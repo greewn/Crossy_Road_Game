@@ -1,0 +1,214 @@
+<canvas id="crossy" width="400" height="400"></canvas>
+
+<script>
+window.onload=function() {
+    canv=document.getElementById("crossy");
+    ctx=canv.getContext("2d");
+    document.addEventListener("keydown",keyPush);
+    setInterval(game,1000/10);
+}
+
+// Chicken starting position
+chick_xInit = 10;
+chick_yInit = 19;
+
+// Chicken current position
+chick_x = chick_xInit;
+chick_y = chick_yInit;
+
+// size of canvas length and width (tiles x tiles)
+grid_size = 20;
+
+// size of each each tile in canvas
+tile_count = 20;
+
+// game obstacles(logs)
+log_bot = [];
+log_middle = [];
+log_top = [];
+
+// initial log tile(count) and direction(sign)
+count1 = 5;
+sign1 = 1;
+
+count2 = 5;
+sign2 = -1;
+
+count3 = 5;
+sign3 = 1;
+
+// generate log row positions
+for (var i = 0; i < grid_size; i++) {
+	if (count1 == 0) {
+		count1 = Math.floor(Math.random()*4) + 2;
+		sign1 = -sign1;
+		count1 = count1 * sign1;
+	}
+
+	if (count1 > 0) {
+		log_bot.push('log');
+		count1--;
+	}
+	else {
+		log_bot.push('space');
+		count1++;
+	}
+}
+
+for (var i = 0; i < grid_size; i++) {
+	if (count2 == 0) {
+		count2 = Math.floor(Math.random()*4) + 2;
+		sign2 = -sign2;
+		count2 = count2 * sign2;
+	}
+
+	if (count2 > 0) {
+		log_middle.push('log');
+		count2--;
+	}
+	else {
+		log_middle.push('space');
+		count2++;
+	}
+}
+
+for (var i = 0; i < grid_size; i++) {
+	if (count3 == 0) {
+		count3 = Math.floor(Math.random()*6) + 3;
+		sign3 = -sign3;
+		count3 = count3 * sign3;
+	}
+
+	if (count3 > 0) {
+		log_top.push('log');
+		count3--;
+	}
+	else {
+		log_top.push('space');
+		count3++;
+	}
+}
+
+function game() {
+	// generate game environment
+    ctx.fillStyle="teal";
+    ctx.fillRect(0,0,canv.width,canv.height);
+
+    ctx.fillStyle="black";
+    ctx.fillRect(3, 3, canv.width-6, canv.height-6);
+
+	// chicken position error checking
+    if (chick_x >= grid_size) {
+		chick_x = grid_size-1;
+		chick_xInit = grid_size-1;
+    }
+    if (chick_y >= grid_size) {
+		chick_y = grid_size-1;
+		chick_yInit = grid_size-1;
+    }
+    if (chick_x < 0) {
+    	chick_x = 0;
+    }
+    if (chick_y < 0) {
+    	chick_y = 0;
+    }
+
+	// generate logs in game environment
+    if (count1 == 0) {
+		count1 = Math.floor(Math.random()*4) + 2;
+		sign1 = -sign1;
+		count1 = count1 * sign1;
+	} else if (count1 > 0) {
+		log_bot.push('log');
+		count1--;
+	} else {
+		log_bot.push('space');
+		count1++;
+	}
+    while(log_bot.length>grid_size) {
+    log_bot.shift();
+    }
+
+    ctx.fillStyle="white";
+    for (var i = 0; i < log_bot.length; i++) {
+    	if (log_bot[i] == 'log') {
+    		ctx.fillRect(i*grid_size, 15*grid_size, grid_size-2, grid_size-2);
+    	}
+    }
+
+    for (var i = 0; i < 2; i++) {
+	    if (count2 == 0) {
+			count2 = Math.floor(Math.random()*4) + 2;
+			sign2 = -sign2;
+			count2 = count2 * sign2;
+		} else if (count2 > 0) {
+			log_middle.push('log');
+			count2--;
+		} else {
+			log_middle.push('space');
+			count2++;
+		}
+	    while(log_middle.length>grid_size) {
+	    log_middle.shift();
+	    }
+	}
+
+    ctx.fillStyle="white";
+    for (var i = 0; i < log_middle.length; i++) {
+    	if (log_middle[i] == 'log') {
+    		ctx.fillRect((grid_size - i - 1)*grid_size, 10*grid_size, grid_size-2, grid_size-2);
+    	}
+    }
+
+    for (var i = 0; i < 3; i++) {
+	    if (count3 == 0) {
+			count3 = Math.floor(Math.random()*4) + 2;
+			sign3 = -sign3;
+			count3 = count3 * sign3;
+		} else if (count3 > 0) {
+			log_top.push('log');
+			count3--;
+		} else {
+			log_top.push('space');
+			count3++;
+		}
+	    while(log_top.length>grid_size) {
+	    	log_top.shift();
+	    }
+	}
+
+    ctx.fillStyle="white";
+    for (var i = 0; i < log_top.length; i++) {
+    	if (log_top[i] == 'log') {
+    		ctx.fillRect(i*grid_size, 5*grid_size, grid_size-2, grid_size-2);
+    	}
+    }
+
+	// chicken interaction with logs
+    if ((chick_y == 15 && log_bot[chick_x] == 'log') || (chick_y == 10 && log_middle[chick_x] == 'log') || (chick_y == 5 && log_top[chick_x] == 'log')) {
+		chick_x = chick_xInit;
+		chick_y = chick_yInit;
+    }
+ 
+    ctx.fillStyle="yellow";
+    ctx.fillRect(chick_x*grid_size, chick_y*grid_size, grid_size-2, grid_size-2);
+}
+
+// chicken movement
+function keyPush(evt) {
+    switch(evt.keyCode) {
+        case 37:
+            chick_x+=-1;
+            break;
+        case 38:
+            chick_y+=-1;
+            break;
+        case 39:
+            chick_x+=1;
+            break;
+        case 40:
+            chick_y+=1;
+            break;
+    }
+}
+</script>
